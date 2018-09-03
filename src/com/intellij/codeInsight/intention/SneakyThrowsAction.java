@@ -1,5 +1,6 @@
 package com.intellij.codeInsight.intention;
 
+import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.codeInsight.ExceptionUtil;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
@@ -9,9 +10,12 @@ import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.util.RefactoringUtil;
 import com.intellij.util.IncorrectOperationException;
+import org.apache.commons.lang3.AnnotationUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.reflect.misc.MethodUtil;
 
 import java.util.*;
 
@@ -33,9 +37,6 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
 
         if (!(element.getContainingFile() instanceof PsiJavaFile)) return false;
         if (!element.isValid()) return false;
-
-        final List<PsiClassType> unhandled = new ArrayList<>();
-
 
         PsiMethod psiMethod = PsiTreeUtil.getParentOfType(element, PsiMethod.class);
         if (psiMethod != null) {
@@ -103,6 +104,7 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
         return getUnhandledExceptions(element.getParent(), topElement, targetMethod);
     }
 
+
     @NotNull
     private static Set<PsiClassType> filterInProjectExceptions(@Nullable PsiMethod targetMethod, @NotNull List<? extends PsiClassType> unhandledExceptions) {
         if (targetMethod == null) return Collections.emptySet();
@@ -143,22 +145,18 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
         new WriteCommandAction.Simple(psiMethod.getProject(), psiMethod.getContainingFile()) {
 
             @Override
-            protected void run() throws Throwable {
-                generateAnnotation(psiMethod, editor);
+            protected void run() {
+                generateAnnotation(psiMethod);
             }
 
         }.execute();
 
     }
 
-    private void generateAnnotation(PsiMethod psiClass, Editor editor) {
-        String annotationString = "@lombok.SneakyThrows";
-        PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(psiClass.getProject());
-        PsiAnnotation annotation = elementFactory.createAnnotationFromText(annotationString, psiClass);
-        PsiElement method = psiClass.addBefore(annotation, psiClass);
-        JavaCodeStyleManager.getInstance(method.getProject()).shortenClassReferences(method);
-
-
+    private void generateAnnotation(PsiMethod psiClass) {
+        String annotationString = "lombok.SneakyThrows";
+        psiClass.getModifierList().addAnnotation(annotationString);
+        JavaCodeStyleManager.getInstance(psiClass.getProject()).shortenClassReferences(psiClass);
     }
 
     public boolean startInWriteAction() {
