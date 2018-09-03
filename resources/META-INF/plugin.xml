@@ -12,7 +12,7 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <intentionAction>
-      <className>com.intellij.codeInsight.intention.ConditionalOperatorConvertor</className>
+      <className>com.intellij.codeInsight.intention.SneakyThrowsAction</className>
       <category>Conditional Operator</category>
       <descriptionDirectoryName>ConditionalOperatorConvertor</descriptionDirectoryName>
     </intentionAction>
@@ -26,7 +26,7 @@
 
   <project-components>
     <component>
-      <implementation-class>com.intellij.codeInsight.intention.ConditionalOperatorConvertor</implementation-class>
+      <implementation-class>com.intellij.codeInsight.intention.SneakyThrowsAction</implementation-class>
     </component>
 
     <!--<component>-->

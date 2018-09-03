@@ -2,10 +2,10 @@ package com.intellij.codeInsight.intention;
 
 import com.intellij.codeInsight.ExceptionUtil;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.util.RefactoringUtil;
 import com.intellij.util.IncorrectOperationException;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 @NonNls
-public class ConditionalOperatorConvertor extends PsiElementBaseIntentionAction implements IntentionAction {
+public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements IntentionAction {
 
     @NotNull
     public String getText() {
@@ -156,10 +156,7 @@ public class ConditionalOperatorConvertor extends PsiElementBaseIntentionAction 
         PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(psiClass.getProject());
         PsiAnnotation annotation = elementFactory.createAnnotationFromText(annotationString, psiClass);
         PsiElement method = psiClass.addBefore(annotation, psiClass);
-
-
-        Document document = editor.getDocument();
-        System.out.println(document);
+        JavaCodeStyleManager.getInstance(method.getProject()).shortenClassReferences(method);
 
 
     }
