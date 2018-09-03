@@ -1,6 +1,5 @@
 package com.intellij.codeInsight.intention;
 
-import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.codeInsight.ExceptionUtil;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
@@ -10,17 +9,16 @@ import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.refactoring.util.RefactoringUtil;
 import com.intellij.util.IncorrectOperationException;
-import org.apache.commons.lang3.AnnotationUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.reflect.misc.MethodUtil;
 
 import java.util.*;
 
 @NonNls
 public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements IntentionAction {
+
+    public static final String LOMBOK_SNEAKY_THROWS = "lombok.SneakyThrows";
 
     @NotNull
     public String getText() {
@@ -154,7 +152,7 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
     }
 
     private void generateAnnotation(PsiMethod psiClass) {
-        String annotationString = "lombok.SneakyThrows";
+        String annotationString = LOMBOK_SNEAKY_THROWS;
         psiClass.getModifierList().addAnnotation(annotationString);
         JavaCodeStyleManager.getInstance(psiClass.getProject()).shortenClassReferences(psiClass);
     }
