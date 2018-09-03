@@ -22,7 +22,7 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
 
     @NotNull
     public String getText() {
-        return "Mark Sneaky Throws";
+        return "Mark sneaky throws";
     }
 
 
