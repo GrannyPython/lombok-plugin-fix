@@ -4,6 +4,9 @@ import com.intellij.codeInsight.ExceptionUtil;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.libraries.Library;
+import com.intellij.openapi.roots.libraries.LibraryTable;
+import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -18,7 +21,9 @@ import java.util.*;
 @NonNls
 public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements IntentionAction {
 
-    public static final String LOMBOK_SNEAKY_THROWS = "lombok.SneakyThrows";
+    private static final String LOMBOK_SNEAKY_THROWS_PACKAGE = "lombok.SneakyThrows";
+    private static final String SNEAKY_THROWS_NAME = "SneakyThrows";
+    private static final String LOMBOK_SHORT_NAME = "lombok";
 
     @NotNull
     public String getText() {
@@ -33,14 +38,14 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
 
     public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
 
-        if (!(element.getContainingFile() instanceof PsiJavaFile)) return false;
-        if (!element.isValid()) return false;
-
         PsiMethod psiMethod = PsiTreeUtil.getParentOfType(element, PsiMethod.class);
-        if (psiMethod != null) {
+        Library[] libraries = LibraryTablesRegistrar.getInstance().getLibraryTable(project).getLibraries();
+        boolean lombokExists = libraries.length!= 0 && Objects.requireNonNull(libraries[0].getName()).contains(LOMBOK_SHORT_NAME);
+
+        if (psiMethod != null && lombokExists) {
             PsiAnnotation[] annotations = psiMethod.getAnnotations();
             for (PsiAnnotation annotation : annotations) {
-                boolean sneakyThrowsExist = annotation.getQualifiedName().endsWith("SneakyThrows");
+                boolean sneakyThrowsExist = annotation.getQualifiedName().endsWith(SNEAKY_THROWS_NAME);
                 if (sneakyThrowsExist) {
                     return false;
                 }
@@ -152,8 +157,7 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
     }
 
     private void generateAnnotation(PsiMethod psiClass) {
-        String annotationString = LOMBOK_SNEAKY_THROWS;
-        psiClass.getModifierList().addAnnotation(annotationString);
+        psiClass.getModifierList().addAnnotation(LOMBOK_SNEAKY_THROWS_PACKAGE);
         JavaCodeStyleManager.getInstance(psiClass.getProject()).shortenClassReferences(psiClass);
     }
 
