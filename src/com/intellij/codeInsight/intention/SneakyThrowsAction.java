@@ -5,7 +5,6 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.libraries.Library;
-import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
@@ -24,23 +23,24 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
     private static final String LOMBOK_SNEAKY_THROWS_PACKAGE = "lombok.SneakyThrows";
     private static final String SNEAKY_THROWS_NAME = "SneakyThrows";
     private static final String LOMBOK_SHORT_NAME = "lombok";
+    private static final String MARK_SNEAKY_THROWS = "Mark sneaky throws";
 
     @NotNull
     public String getText() {
-        return "Mark sneaky throws";
+        return MARK_SNEAKY_THROWS;
     }
 
 
     @NotNull
     public String getFamilyName() {
-        return "Mark sneaky throws";
+        return getText();
     }
 
     public boolean isAvailable(@NotNull Project project, Editor editor, @Nullable PsiElement element) {
 
         PsiMethod psiMethod = PsiTreeUtil.getParentOfType(element, PsiMethod.class);
         Library[] libraries = LibraryTablesRegistrar.getInstance().getLibraryTable(project).getLibraries();
-        boolean lombokExists = libraries.length!= 0 && Objects.requireNonNull(libraries[0].getName()).contains(LOMBOK_SHORT_NAME);
+        boolean lombokExists = libraries.length != 0 && Objects.requireNonNull(libraries[0].getName()).contains(LOMBOK_SHORT_NAME);
 
         if (psiMethod != null && lombokExists) {
             PsiAnnotation[] annotations = psiMethod.getAnnotations();
@@ -156,9 +156,9 @@ public class SneakyThrowsAction extends PsiElementBaseIntentionAction implements
 
     }
 
-    private void generateAnnotation(PsiMethod psiClass) {
-        psiClass.getModifierList().addAnnotation(LOMBOK_SNEAKY_THROWS_PACKAGE);
-        JavaCodeStyleManager.getInstance(psiClass.getProject()).shortenClassReferences(psiClass);
+    private void generateAnnotation(PsiMethod psiMethod) {
+        psiMethod.getModifierList().addAnnotation(LOMBOK_SNEAKY_THROWS_PACKAGE);
+        JavaCodeStyleManager.getInstance(psiMethod.getProject()).shortenClassReferences(psiMethod);
     }
 
     public boolean startInWriteAction() {
